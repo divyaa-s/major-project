@@ -1,0 +1,290 @@
+"""
+PRNU-Based Face Swap Detection (Standalone)
+Specialized for detecting face-swapped deepfakes (not GAN-generated)
+
+How it works:
+- Face-swapped images have different PRNU in face vs background
+- GAN images have no PRNU anywhere (will show low correlation everywhere)
+- Real images have consistent PRNU (will show high correlation)
+"""
+
+import cv2
+import numpy as np
+from PIL import Image
+from facenet_pytorch import MTCNN
+from scipy.signal import wiener
+
+# Initialize face detector
+mtcnn = MTCNN(keep_all=False, device='cpu')
+
+
+def extract_prnu_noise(image, size=128):
+    """
+    Extract PRNU noise using Wiener filter (fast method)
+    """
+    if image is None or image.size == 0:
+        return None
+    
+    try:
+        img = cv2.resize(image, (size, size))
+        img = img.astype(np.float32) / 255.0
+        
+        # Wiener filter denoising
+        denoised = wiener(img, (5, 5))
+        noise = img - denoised
+        
+        # Zero-mean normalization
+        noise = noise - np.mean(noise)
+        
+        # L2 normalization
+        norm = np.linalg.norm(noise) + 1e-8
+        noise = noise / norm
+        
+        return noise
+    
+    except Exception as e:
+        print(f"ERROR: PRNU extraction failed: {e}")
+        return None
+
+
+def detect_face_swap(image_path):
+    """
+    Detect face-swapped deepfakes using PRNU correlation analysis
+    
+    Returns:
+        dict with detection result and confidence
+    """
+    
+    print(f"\n🔍 Analyzing: {image_path}")
+    
+    # Load image
+    img = cv2.imread(image_path)
+    if img is None:
+        return {
+            "error": "Failed to load image",
+            "success": False
+        }
+    
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    h, w = gray.shape
+    
+    print(f"   Image size: {w}x{h}")
+    
+    # Detect face using MTCNN
+    try:
+        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img_pil = Image.fromarray(img_rgb)
+        boxes, _ = mtcnn.detect(img_pil)
+        
+        if boxes is None or len(boxes) == 0:
+            print("   ❌ No face detected")
+            return {
+                "success": False,
+                "error": "No face detected",
+                "note": "Face-swap detection requires a detected face region"
+            }
+        
+        # Get largest face
+        x1, y1, x2, y2 = boxes[0].astype(int)
+        
+        # Validate bounds
+        x1, y1 = max(0, x1), max(0, y1)
+        x2, y2 = min(w, x2), min(h, y2)
+        
+        face_width = x2 - x1
+        face_height = y2 - y1
+        
+        print(f"   ✓ Face detected: {face_width}x{face_height} at ({x1},{y1})")
+        
+        if face_width < 64 or face_height < 64:
+            print("   ❌ Face too small")
+            return {
+                "success": False,
+                "error": "Face region too small for analysis"
+            }
+        
+    except Exception as e:
+        print(f"   ❌ Face detection failed: {e}")
+        return {
+            "success": False,
+            "error": f"Face detection failed: {str(e)}"
+        }
+    
+    # Extract face region
+    face = gray[y1:y2, x1:x2]
+    
+    # Extract multiple background regions
+    bg_regions = []
+    
+    # Strategy: Sample from 4 corners + edges, avoiding face
+    margin = 20  # Pixels to avoid near face
+    
+    # Top-left corner
+    if y1 > 80 and x1 > 80:
+        bg_regions.append(("Top-Left", gray[0:y1-margin, 0:x1-margin]))
+    
+    # Top-right corner
+    if y1 > 80 and (w - x2) > 80:
+        bg_regions.append(("Top-Right", gray[0:y1-margin, x2+margin:w]))
+    
+    # Bottom-left corner
+    if (h - y2) > 80 and x1 > 80:
+        bg_regions.append(("Bottom-Left", gray[y2+margin:h, 0:x1-margin]))
+    
+    # Bottom-right corner
+    if (h - y2) > 80 and (w - x2) > 80:
+        bg_regions.append(("Bottom-Right", gray[y2+margin:h, x2+margin:w]))
+    
+    # Top edge (if face not at top)
+    if y1 > 100:
+        bg_regions.append(("Top-Edge", gray[0:y1-margin, :]))
+    
+    # Bottom edge (if face not at bottom)
+    if (h - y2) > 100:
+        bg_regions.append(("Bottom-Edge", gray[y2+margin:h, :]))
+    
+    # Left edge (if face not at left)
+    if x1 > 100:
+        bg_regions.append(("Left-Edge", gray[:, 0:x1-margin]))
+    
+    # Right edge (if face not at right)
+    if (w - x2) > 100:
+        bg_regions.append(("Right-Edge", gray[:, x2+margin:w]))
+    
+    if len(bg_regions) == 0:
+        print("   ❌ Insufficient background area")
+        return {
+            "success": False,
+            "error": "Face occupies too much of image - insufficient background for analysis"
+        }
+    
+    print(f"   ✓ Found {len(bg_regions)} background regions")
+    
+    # Extract PRNU from face
+    face_noise = extract_prnu_noise(face, size=128)
+    if face_noise is None:
+        return {
+            "success": False,
+            "error": "PRNU extraction failed on face region"
+        }
+    
+    # Extract PRNU from background regions and compute correlations
+    correlations = []
+    
+    for region_name, bg_region in bg_regions:
+        # Skip very small regions
+        if bg_region.size < 10000:  # ~100x100 pixels
+            continue
+        
+        bg_noise = extract_prnu_noise(bg_region, size=128)
+        if bg_noise is None:
+            continue
+        
+        # Compute correlation between face and background PRNU
+        try:
+            corr = np.corrcoef(
+                face_noise.flatten(),
+                bg_noise.flatten()
+            )[0, 1]
+            
+            if not np.isnan(corr):
+                correlations.append(abs(corr))
+                print(f"      {region_name}: correlation = {abs(corr):.4f}")
+        
+        except Exception as e:
+            print(f"      {region_name}: correlation failed ({e})")
+            continue
+    
+    if len(correlations) == 0:
+        return {
+            "success": False,
+            "error": "Could not compute face-background PRNU correlation"
+        }
+    
+    # Use MINIMUM correlation (most suspicious region)
+    # If even one background region mismatches, it's suspicious
+    min_correlation = float(np.min(correlations))
+    avg_correlation = float(np.mean(correlations))
+    std_correlation = float(np.std(correlations))
+    
+    print(f"\n   📊 PRNU Correlations:")
+    print(f"      Min: {min_correlation:.4f}")
+    print(f"      Avg: {avg_correlation:.4f}")
+    print(f"      Std: {std_correlation:.4f}")
+    
+    # ===== DECISION LOGIC =====
+    # Thresholds calibrated for face-swap detection
+    
+    # Very low correlation = likely face swap
+    if min_correlation < 0.15:
+        verdict = "LIKELY FACE SWAP"
+        confidence = "High"
+        suspicion_score = 0.85
+        explanation = (
+            f"Very low PRNU correlation ({min_correlation:.3f}) between face and background regions. "
+            "This strongly suggests the face was transplanted from a different image source."
+        )
+        emoji = "🚨"
+    
+    # Low correlation = possible face swap
+    elif min_correlation < 0.25:
+        verdict = "POSSIBLE FACE SWAP"
+        confidence = "Moderate"
+        suspicion_score = 0.65
+        explanation = (
+            f"Low PRNU correlation ({min_correlation:.3f}) between face and background. "
+            "Face and background may be from different camera sources."
+        )
+        emoji = "⚠️"
+    
+    # Moderate correlation but high variance = suspicious
+    elif avg_correlation < 0.35 and std_correlation > 0.15:
+        verdict = "INCONSISTENT PRNU PATTERN"
+        confidence = "Moderate"
+        suspicion_score = 0.55
+        explanation = (
+            f"Inconsistent PRNU correlations across regions (avg={avg_correlation:.3f}, std={std_correlation:.3f}). "
+            "Possible manipulation or heavy processing."
+        )
+        emoji = "🤔"
+    
+    # Moderate correlation = unclear (could be compression or GAN)
+    elif min_correlation < 0.40:
+        verdict = "INCONCLUSIVE"
+        confidence = "Low"
+        suspicion_score = 0.50
+        explanation = (
+            f"Moderate PRNU correlation ({min_correlation:.3f}). "
+            "Could be authentic but heavily compressed, or a sophisticated manipulation. "
+            "PRNU analysis alone is insufficient."
+        )
+        emoji = "❓"
+    
+    # High correlation = likely authentic (same camera source)
+    else:
+        verdict = "LIKELY AUTHENTIC"
+        confidence = "High"
+        suspicion_score = 0.20
+        explanation = (
+            f"High PRNU correlation ({min_correlation:.3f}) between face and background. "
+            "Face and background appear to originate from the same camera sensor."
+        )
+        emoji = "✅"
+    
+    print(f"\n   {emoji} {verdict} (Confidence: {confidence})")
+    print(f"   Suspicion Score: {suspicion_score:.2f}")
+    
+    return {
+        "success": True,
+        "verdict": verdict,
+        "confidence": confidence,
+        "suspicion_score": suspicion_score,  # 0-1, higher = more likely fake
+        "metrics": {
+            "min_correlation": round(min_correlation, 4),
+            "avg_correlation": round(avg_correlation, 4),
+            "std_correlation": round(std_correlation, 4),
+            "num_background_regions": len(correlations)
+        },
+        "explanation": explanation,
+        "note": "This analysis detects face-swapped images. It is NOT effective for fully GAN-generated faces."
+    }

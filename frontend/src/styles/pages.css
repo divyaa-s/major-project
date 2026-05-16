@@ -1,0 +1,38 @@
+.container {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 20px;
+  text-align: center;
+  background: #001031;
+  color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.container h2 {
+  font-size: 20px;
+  color: #90afff; /* This should apply! */
+  margin-bottom: 16px;
+}
+
+button {
+  background-color: #00aaff;
+  color: white;
+  padding: 10px 15px;
+  margin: 10px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+button:hover {
+  background-color: #0077cc;
+}
+
+.generate-report {
+  background-color: #ff6600;
+}
+
+.download-report {
+  background-color: #ff0066;
+}

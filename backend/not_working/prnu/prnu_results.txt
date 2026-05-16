@@ -1,0 +1,10 @@
+real: 100%|███████████████████████████████████████████████████████████████████████████████████████████████| 50000/50000 [28:32<00:00, 29.19it/s] 
+fake: 100%|███████████████████████████████████████████████████████████████████████████████████████████████| 50000/50000 [33:37<00:00, 24.79it/s] 
+
+===== PRNU ANALYSIS =====
+Spatial Consistency (REAL): 0.0126
+Spatial Consistency (FAKE): 0.0125
+Face–BG PRNU Diff (REAL):  0.0287
+Face–BG PRNU Diff (FAKE):  0.0287
+→ Inconsistent PRNU → likely SYNTHETIC
+→ Face/Background mismatch → likely FACE MANIPULATION

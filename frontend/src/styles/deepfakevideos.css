@@ -1,0 +1,84 @@
+/* Deepfake Videos Container */
+.deepfake-videos-container {
+  text-align: center;
+  padding: 20px;
+  background-color: #001031; /* Matching the header and main theme */
+  color: #ffffff; /* White text for contrast */
+}
+
+/* Video List */
+.video-list {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 30px; /* Adds space between video items */
+}
+
+/* Video Item */
+.video-item {
+  margin: 20px;
+  text-align: center;
+  max-width: 1000px; /* Increased max-width for larger video containers */
+  width: 100%;
+  background-color: #112240; /* Dark background for the video container */
+  border-radius: 12px; /* Rounded corners for modern look */
+  padding: 15px; /* Padding inside the container */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Soft shadow for depth */
+}
+
+/* Video Wrapper */
+.video-wrapper {
+  position: relative;
+  padding-bottom: 56.25%; /* Aspect ratio for 16:9 videos */
+  height: 0;
+  overflow: hidden;
+  width: 100%;
+  background: #0a192f; /* Dark background to match theme */
+  border-radius: 8px; /* Rounded corners for the iframe */
+}
+
+/* Video Iframe */
+.video-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px; /* Rounded corners for iframe */
+}
+
+/* Video Item Title */
+.video-item h3 {
+  font-size: 22px;
+  color: #90afff; /* Accent color for the title */
+  margin-bottom: 15px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .video-item h3 {
+    font-size: 18px;
+  }
+
+  .video-wrapper {
+    padding-bottom: 56.25%; /* Keep aspect ratio on small screens */
+  }
+
+  .video-item {
+    max-width: 90%; /* Ensure container doesn't stretch too wide on smaller screens */
+  }
+}
+
+@media (max-width: 576px) {
+  .video-item h3 {
+    font-size: 16px;
+  }
+
+  .video-wrapper {
+    padding-bottom: 56.25%; /* Keep aspect ratio on mobile devices */
+  }
+}
+
+.deepfake-videos-container h2{
+  color: #90afff;
+}

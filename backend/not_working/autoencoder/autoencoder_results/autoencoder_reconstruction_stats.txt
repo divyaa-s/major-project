@@ -1,0 +1,7 @@
+Real Images:
+Mean Reconstruction Error = 0.006161
+Std Reconstruction Error  = 0.001405
+
+Fake Images:
+Mean Reconstruction Error = 0.005719
+Std Reconstruction Error  = 0.001244

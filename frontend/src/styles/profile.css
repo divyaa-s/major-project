@@ -1,0 +1,89 @@
+.profile-container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 30px;
+  background: #001031;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #90afff;
+}
+
+.profile-details {
+  background: #112240;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.profile-details p {
+  margin: 10px 0;
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.edit-form,
+.change-password-form {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.edit-form label,
+.change-password-form label {
+  display: block;
+  margin: 10px 0 5px;
+  color: #ccd8ff;
+  font-weight: 500;
+}
+
+.edit-form input,
+.change-password-form input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #90afff;
+  border-radius: 8px;
+  font-size: 15px;
+  background-color: #00214f;
+  color: #ffffff;
+  box-sizing: border-box;
+}
+
+.profile-actions {
+  margin-top: 20px;
+}
+
+.profile-actions button,
+.edit-form button,
+.change-password-form button {
+  background-color: #90afff;
+  color: rgb(0, 0, 0);
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  margin: 8px 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.profile-actions button:hover,
+.edit-form button:hover,
+.change-password-form button:hover {
+  background-color: #90afff;
+}
+
+/* Cancel button in change password form (3rd child) */
+.change-password-form button:nth-child(3) {
+  background-color: #ff0066;
+}
+
+.change-password-form button:nth-child(3):hover {
+  background-color: #cc0052;
+}

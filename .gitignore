@@ -1,0 +1,59 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+venv/
+env/
+.env
+
+# === HEAVY MODELS & WEIGHTS ===
+**/*.pth
+**/*.pt
+**/*.pkl
+**/*.h5
+**/*.zip
+**/*.pt
+checkpoints/
+models/
+models/**
+
+# === DATASETS & MEDIA ===
+**/*.mp4
+**/*.avi
+**/*.mov
+**/*.npy
+**/*.png
+**/*.jpg
+**/*.jpeg
+**/*.csv
+datasets/
+images/
+combined_new/
+video_codes_backup/
+previous\ runs/
+kaggle_codes/dfd\ dataset/
+kaggle_codes/dfd\ dataset/**
+
+# Database
+*.sqlite3
+
+# Django Media and Static
+backend/media/
+backend/staticfiles/
+backend/static/grad_cams/
+backend/static/plots/
+backend/static/
+
+# Node/React
+node_modules/
+frontend/build/
+.eslintcache
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

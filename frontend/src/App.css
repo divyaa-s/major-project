@@ -1,0 +1,24 @@
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Upload from "./pages/Upload";
+import Report from "./pages/Report";
+import Awareness from "./pages/Awareness";
+import Header from "./components/Header";
+
+const App = () => {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/upload" element={<Upload />} />
+        <Route path="/report" element={<Report />} />  {/* ✅ Make sure this exists */}
+        <Route path="/awareness" element={<Awareness />} />
+      </Routes>
+    </Router>
+  );
+};
+
+export default App;

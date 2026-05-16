@@ -1,0 +1,14 @@
+django>=3.2
+djangorestframework
+django-cors-headers
+Pillow
+torch
+torchvision
+opencv-python
+numpy
+facenet-pytorch
+timm
+tqdm
+matplotlib
+joblib
+grad-cam

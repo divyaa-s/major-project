@@ -1,0 +1,43 @@
+.container {
+  padding: 24px;
+  background-color: #001031; /* Using the same background color as in pages.css */
+  color: #ffffff; /* Text color consistent with pages.css */
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); /* Same shadow effect as pages.css */
+  text-align: justify;
+}
+
+.awareness-card {
+  background: #112240; /* Lightens the card background to match pages.css theme */
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  color: #ffffff; /* Ensure text inside card is white */
+  text-align: justify; /* Justify text to ensure even alignment for paragraphs */
+}
+
+.awareness-card h2 {
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  color: #90afff; /* Consistent header color as per pages.css */
+}
+
+.awareness-card p {
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 12px;
+  color: #ffffff; /* White text for paragraphs */
+}
+
+.awareness-list {
+  margin-top: 15px;
+  list-style-type: disc;
+  padding-left: 20px;
+  color: #ffffff; /* Make sure list items are white */
+  font-size: 16px;
+}
+
+.awareness-list li {
+  margin-bottom: 8px;
+}
